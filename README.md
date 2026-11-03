@@ -7,10 +7,10 @@ A "Duda", assistente virtual da loja, responde sobre produtos, preços, promoç�
 encaminha casos para a equipe humana e recusa o que está fora do escopo.
 
 ```
-👤 Me arrependi da minha compra, posso devolver?
-🔧 search_store_policies(query='prazo para devolução por arrependimento') → list_my_orders()
+ Me arrependi da minha compra, posso devolver?
+ search_store_policies(query='prazo para devolução por arrependimento') → list_my_orders()
    → search_store_policies(query='garantia legal e garantia do fabricante')
-🎸 Vi aqui o seu pedido nº 7 (Shelby SU-21S Soprano, R$ 159,90). Infelizmente, o prazo para devolução
+ Vi aqui o seu pedido nº 7 (Shelby SU-21S Soprano, R$ 159,90). Infelizmente, o prazo para devolução
    por arrependimento já passou. Pela política, o cliente tem até 7 dias corridos após o recebimento [...];
    o pedido foi entregue em 17/02/2026, há 259 dias. [...] Mesmo assim, ainda há outras opções:
    - Garantia legal: cobre defeitos de fabricação por 90 dias a partir do recebimento. Esse prazo também já passou.
@@ -301,7 +301,7 @@ São três camadas, da mais barata à mais completa:
 ## Conversas de exemplo
 
 Geradas pelo agente real com [scripts/generate_conversations.py](scripts/generate_conversations.py). Cada
-mensagem mostra as ferramentas chamadas (linhas 🔧).
+mensagem mostra as ferramentas chamadas (linhas).
 
 1. [Catálogo — violões até R$ 1.000](conversations/01_catalogo_violoes_ate_1000.md): filtro por categoria e
    preço, recomendação restrita ao estoque, produto esgotado com alternativas.
