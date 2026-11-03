@@ -20,7 +20,7 @@ RUNTIME_DIR = PROJECT_ROOT / "runtime"
 STORE_TZ = ZoneInfo("America/Campo_Grande")
 
 DEFAULT_LLM_MODEL = "anthropic/claude-haiku-5.5"
-DEFAULT_EMBEDDING_MODEL = "openai/text-embedding-3-small"
+DEFAULT_EMBEDDING_MODEL = "baai/bge-m3"  # chosen by evals/retrieval_benchmark.py
 DEFAULT_JUDGE_MODEL = "anthropic/claude-sonnet-5.5"
 
 

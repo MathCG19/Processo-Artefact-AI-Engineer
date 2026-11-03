@@ -1,0 +1,69 @@
+# Perguntas no estilo do cliente -> seções do manual que contêm a resposta (qualquer uma conta como acerto).
+# Usado por tests/test_policies.py e por evals/retrieval_benchmark.py.
+- question: que horas a loja abre no sábado?
+  expected_sections:
+  - '2'
+- question: qual o endereço de vocês?
+  expected_sections:
+  - '1.2'
+  - '0'
+- question: endereço da loja
+  expected_sections:
+  - '1.2'
+  - '0'
+- question: onde fica a loja física?
+  expected_sections:
+  - '1.2'
+  - '0'
+- question: telefone e e-mail de contato
+  expected_sections:
+  - '1.2'
+  - '0'
+  - '7.1'
+- question: aceitam pix? tem desconto?
+  expected_sections:
+  - '3'
+- question: posso parcelar em 10 vezes no cartão?
+  expected_sections:
+  - '3.1'
+  - '3'
+- question: me arrependi da compra, posso devolver?
+  expected_sections:
+  - '4.1'
+- question: meu violão chegou com defeito, e agora?
+  expected_sections:
+  - '4.2'
+  - '8.1'
+- question: quero trocar por outra cor
+  expected_sections:
+  - '4.3'
+- question: posso trocar a boquilha do saxofone?
+  expected_sections:
+  - '4.4'
+- question: quanto custa o frete aqui em Campo Grande?
+  expected_sections:
+  - '5.1'
+- question: vocês entregam em Dourados? demora quanto?
+  expected_sections:
+  - '5.2'
+- question: como faço pra rastrear meu pedido?
+  expected_sections:
+  - '5.3'
+- question: quando vai ter black friday?
+  expected_sections:
+  - '6.1'
+- question: o desconto do pix vale junto com a promoção?
+  expected_sections:
+  - '6.2'
+- question: qual a garantia dos instrumentos?
+  expected_sections:
+  - '8.1'
+  - '8.2'
+- question: vocês compartilham meus dados pessoais?
+  expected_sections:
+  - '9'
+- question: qual o número do whatsapp?
+  expected_sections:
+  - '7.1'
+  - '1.2'
+  - '0'

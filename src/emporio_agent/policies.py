@@ -30,6 +30,8 @@ NOISE_LINES = [
     re.compile(r"^Página \d+\s*$"),
 ]
 SHORT_INTRO_CHARS = 300  # section intros shorter than this are merged into the first subsection
+# Bump when the chunking logic changes, so cached embeddings are rebuilt.
+CHUNKER_VERSION = 2
 
 
 @dataclass
@@ -55,9 +57,42 @@ def _clean_heading(text: str) -> str:
     return re.sub(r"\*+", "", text).strip()
 
 
+def _cells(row: str) -> list[str]:
+    cells = [re.sub(r"\*+", "", c).replace("<br>", " ").strip() for c in row.strip().strip("|").split("|")]
+    return [c for c in cells if c]
+
+
+def linearize_tables(lines: list[str]) -> list[str]:
+    """Turn Markdown tables into 'column: value' lines.
+
+    Tables embed poorly ('|**Campo**|**Informação**|...'): in the first eval run the company-data
+    table (1.2) ranked below the opening-hours section for "endereço da loja". One sentence-like
+    line per row keeps the content and gives the embedding model clear key/value signal.
+    """
+    out: list[str] = []
+    i = 0
+    while i < len(lines):
+        is_table = lines[i].lstrip().startswith("|") and i + 1 < len(lines) and re.match(r"^\s*\|[-|\s:]+\|\s*$", lines[i + 1])
+        if not is_table:
+            out.append(lines[i])
+            i += 1
+            continue
+        header = _cells(lines[i])
+        i += 2
+        while i < len(lines) and lines[i].lstrip().startswith("|"):
+            row = _cells(lines[i])
+            if len(row) == 2:            # key/value or two-column table: "Endereço: Rua ..."
+                out.append(f"- {row[0]}: {row[1]}")
+            elif row:                    # wider tables: "PIX — Condições: ...; Observações: ..."
+                pairs = "; ".join(f"{h}: {v}" for h, v in zip(header[1:], row[1:]))
+                out.append(f"- {row[0]} — {pairs}")
+            i += 1
+    return out
+
+
 def _clean_body(lines: list[str]) -> str:
     kept = [ln.rstrip() for ln in lines if not any(p.match(ln.strip()) for p in NOISE_LINES)]
-    text = "\n".join(kept)
+    text = "\n".join(linearize_tables(kept))
     text = re.sub(r"^#\s+", "", text, flags=re.MULTILINE)    # cover title "# **EMPÓRIO...**"
     text = re.sub(r"\n{3,}", "\n\n", text)
     return text.strip()
@@ -131,7 +166,11 @@ class PolicyIndex:
 
         if cache_file.exists():
             cached = json.loads(cache_file.read_text(encoding="utf-8"))
-            if cached.get("pdf_sha256") == pdf_hash and cached.get("embedding_model") == embedding_model:
+            if (
+                cached.get("pdf_sha256") == pdf_hash
+                and cached.get("embedding_model") == embedding_model
+                and cached.get("chunker_version") == CHUNKER_VERSION
+            ):
                 chunks = [PolicyChunk(**c) for c in cached["chunks"]]
                 return cls(chunks, np.array(cached["embeddings"], dtype=np.float32), embed_query)
 
@@ -146,6 +185,7 @@ class PolicyIndex:
                 {
                     "pdf_sha256": pdf_hash,
                     "embedding_model": embedding_model,
+                    "chunker_version": CHUNKER_VERSION,
                     "chunks": [asdict(c) for c in chunks],
                     "embeddings": embeddings.tolist(),
                 },
