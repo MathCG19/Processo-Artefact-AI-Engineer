@@ -7,15 +7,17 @@ A "Duda", assistente virtual da loja, responde sobre produtos, preços, promoç�
 encaminha casos para a equipe humana e recusa o que está fora do escopo.
 
 ```
- Me arrependi da minha compra, posso devolver?
- search_store_policies(query='prazo para devolução por arrependimento') → list_my_orders()
-   → search_store_policies(query='garantia legal e garantia do fabricante')
- Vi aqui o seu pedido nº 7 (Shelby SU-21S Soprano, R$ 159,90). Infelizmente, o prazo para devolução
-   por arrependimento já passou. Pela política, o cliente tem até 7 dias corridos após o recebimento [...];
-   o pedido foi entregue em 17/02/2026, há 259 dias. [...] Mesmo assim, ainda há outras opções:
-   - Garantia legal: cobre defeitos de fabricação por 90 dias a partir do recebimento. Esse prazo também já passou.
-   - Garantia do fabricante: costuma durar de 6 meses a 2 anos [...]. A loja também pode intermediar esse processo.
-   Posso registrar o seu caso para a equipe avaliar [...]. Quer que eu faça isso?
+Cliente:      Me arrependi da minha compra, posso devolver?
+Ferramentas:  search_store_policies('prazo para devolução por arrependimento') → list_my_orders()
+              → search_store_policies('garantia legal e garantia do fabricante')
+Duda:         Letícia, pelo seu pedido nº 7 (Shelby SU-21S Soprano Sunburst, ukulele), o prazo de
+              arrependimento já passou. Pela política, a devolução por arrependimento vale por 7 dias
+              corridos após o recebimento. Como a data real de recebimento não está registrada, usei a
+              previsão de entrega (17/02/2026), e já se passaram 259 dias. [...]
+              - Troca por defeito de fabricação: até 30 dias após a compra.
+              - Garantia legal: 90 dias contra defeitos de fabricação, a partir do recebimento.
+              - Garantia do fabricante: varia de 6 meses a 2 anos [...], e a loja pode intermediar se você pedir.
+              Se quiser, registro seu caso para a equipe avaliar [...]. Quer que eu abra o registro?
 ```
 <sub>Trecho real de [conversations/04_devolucao_aplicando_politicas.md](conversations/04_devolucao_aplicando_politicas.md), abreviado com [...].</sub>
 
@@ -63,7 +65,7 @@ Na primeira execução o manual em PDF é indexado. Isso leva alguns segundos e 
 **Testes, avaliação e utilitários:**
 
 ```bash
-pytest                                     # 26 testes (1 deles chama a API de embeddings)
+pytest                                     # 28 testes (1 deles chama a API de embeddings)
 python evals/run_evals.py                  # 23 casos ponta a ponta com o agente real
 python evals/run_evals.py --model anthropic/claude-sonnet-5.5
 python evals/retrieval_benchmark.py        # compara modelos de embedding na recuperação das políticas
@@ -163,10 +165,12 @@ escolha com a suíte de avaliação, comparando com um modelo maior:
 
 | Modelo | Casos aprovados (23) | Latência média por mensagem | Custo por mensagem |
 |---|---|---|---|
-| `anthropic/claude-haiku-5.5` | **23/23** (3 execuções: 69/69) | 4,8 s | US$ 0,0012 |
-| `anthropic/claude-sonnet-5.5` | 23/23 (1 execução) | 6,3 s | US$ 0,0244 (cerca de 20×) |
+| `anthropic/claude-haiku-5.5` | **23/23** (3 execuções: 69/69) | 4,9 s | US$ 0,0012 |
+| `anthropic/claude-sonnet-5.5` | 23/23 (1 execução¹) | 6,9 s | US$ 0,0258 (cerca de 21×) |
 
-Com a mesma taxa de acerto nesta suíte, o Sonnet custa cerca de 20 vezes mais e é cerca de 30% mais lento, então o Haiku é a escolha adequada para este caso de uso. Uma suíte de 23 casos não distingue diferenças finas de qualidade; com mais casos difíceis a comparação poderia mudar, e por isso a troca é só uma variável de ambiente. Antes da correção da recuperação (abaixo), o Sonnet chegou a falhar um caso, mas a causa era a busca e não o modelo. O modelo é configurável por `LLM_MODEL`.
+<sub>¹ O Sonnet rodou com a versão do prompt imediatamente anterior à final, que difere só na redação da regra de emojis (ver [Estratégia de prompt](#estratégia-de-prompt)). Não repeti com o prompt final porque os créditos de API da conta de testes acabaram.</sub>
+
+Com a mesma taxa de acerto nesta suíte, o Sonnet custa cerca de 20 vezes mais e é cerca de 40% mais lento, então o Haiku é a escolha adequada para este caso de uso. Uma suíte de 23 casos não distingue diferenças finas de qualidade; com mais casos difíceis a comparação poderia mudar, e por isso a troca é só uma variável de ambiente. Antes da correção da recuperação (abaixo), o Sonnet chegou a falhar um caso, mas a causa era a busca e não o modelo. O modelo é configurável por `LLM_MODEL`.
 
 ### Recuperação das políticas (RAG)
 
@@ -228,7 +232,10 @@ Outros elementos do prompt:
   não oferecer direitos que não estejam na política.
 - **Temperatura 0,2**, para consistência.
 - **Iterado com evidência:** cada ajuste de prompt veio de uma falha observada nas conversas ou nos evals e
-  ganhou um caso de avaliação para não regredir (veja o histórico de commits).
+  ganhou um caso de avaliação para não regredir (veja o histórico de commits). Um exemplo: ao trocar a regra
+  de emojis para "Não use emojis.", o Haiku passou a encurtar "No momento não temos" para "No temos" em
+  cerca de 12% das respostas (4 de 32). Num teste A/B, a redação "Escreva só com texto, sem emojis." teve 0 de
+  28, e foi a adotada.
 
 ### Segurança e privacidade (LGPD)
 
@@ -277,8 +284,9 @@ na camada de dados ([src/emporio_agent/data.py](src/emporio_agent/data.py)); o r
 
 São três camadas, da mais barata à mais completa:
 
-1. **Testes unitários** (`pytest`, 26 testes, sem rede exceto 1): catálogo, autorização de pedidos, cálculo de
-   datas, divisão do PDF, protocolo único por caso e taxa de acerto da recuperação.
+1. **Testes unitários** (`pytest`, 28 testes, sem rede exceto 1): catálogo, autorização de pedidos, cálculo de
+   datas, divisão do PDF, protocolo único por caso, taxa de acerto da recuperação e ausência de emojis no
+   repositório.
 2. **Benchmark de recuperação** ([evals/retrieval_benchmark.py](evals/retrieval_benchmark.py)): hit@1, hit@3
    e MRR por modelo de embedding.
 3. **Evals ponta a ponta** ([evals/cases.yaml](evals/cases.yaml), 23 casos, com o agente real). Combinam
@@ -294,14 +302,15 @@ São três camadas, da mais barata à mais completa:
 | Políticas aplicadas a pedido, encaminhamento (devolução, reclamação, protocolo único) | 3 |
 | Escopo (acessórios, fora do escopo, vazamento do prompt) | 3 |
 
-**Resultado com o modelo adotado:** **23/23 casos em 3 execuções independentes (69/69)**, com cerca de 4,8 s e US$ 0,0012 por mensagem. O gasto total de API do projeto, somando desenvolvimento, todas as rodadas de evals (inclusive com Sonnet) e o juiz, foi de cerca de US$ 1,70. Relatórios em [evals/results/](evals/results/).
+**Resultado com o modelo adotado:** **23/23 casos em 3 execuções independentes (69/69)**, com cerca de 4,9 s e US$ 0,0012 por mensagem. O gasto total de API do projeto, somando desenvolvimento, todas as rodadas de evals (inclusive com Sonnet), o juiz e os testes A/B de prompt, foi de cerca de US$ 3,40. Relatórios em [evals/results/](evals/results/).
 
 ---
 
 ## Conversas de exemplo
 
-Geradas pelo agente real com [scripts/generate_conversations.py](scripts/generate_conversations.py). Cada
-mensagem mostra as ferramentas chamadas (linhas).
+Geradas pelo agente real com [scripts/generate_conversations.py](scripts/generate_conversations.py), numa única
+execução com a versão final do prompt, sem edição manual. Cada mensagem mostra as ferramentas chamadas (linhas
+**Ferramentas**, que não aparecem para o cliente).
 
 1. [Catálogo — violões até R$ 1.000](conversations/01_catalogo_violoes_ate_1000.md): filtro por categoria e
    preço, recomendação restrita ao estoque, produto esgotado com alternativas.

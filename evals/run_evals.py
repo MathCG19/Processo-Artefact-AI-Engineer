@@ -129,7 +129,10 @@ def run_case(case: dict, resources: AgentResources, use_judge: bool, tickets_pat
         f"Cliente: {turn}\nAssistente: {reply.text}" for turn, reply in zip(case["turns"], replies)
     )
     if use_judge and case.get("judge") and replies:
-        checks.append(judge(resources.client, resources.settings.judge_model, case["judge"], conversation))
+        try:
+            checks.append(judge(resources.client, resources.settings.judge_model, case["judge"], conversation))
+        except Exception as exc:  # e.g. rate limit / no credits: fail this check, keep the run going
+            checks.append(Check("juiz", False, f"erro ao chamar o juiz: {type(exc).__name__}: {str(exc)[:120]}"))
 
     return {
         "id": case["id"],

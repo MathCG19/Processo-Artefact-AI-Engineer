@@ -3,59 +3,61 @@
 Combina dado estruturado (preço, promoção ativa) com regra da política (PIX, parcelamento, promoções não cumulativas — seções 3, 3.1 e 6.2).
 
 > **Modelo:** `anthropic/claude-haiku-5.5` · **Data de referência:** 03/11/2026 · **Canal:** chat anônimo  
-> **Custo total:** US$ 0.0045 · As linhas 🔧 mostram as ferramentas que o agente chamou (não aparecem para o cliente).
+> **Custo total:** US$ 0.0046 · As linhas **Ferramentas** mostram o que o agente consultou (não aparecem para o cliente).
 
 ---
 
-**👤 Cliente:** Quanto custa o Takamine GD20?
+**Cliente:** Quanto custa o Takamine GD20?
 
-> 🔧 `search_products(query='Takamine GD20')`
+> **Ferramentas:** `search_products(query='Takamine GD20')`
 
-**🎸 Duda:**
+**Duda:**
 
-Oi! O Takamine GD20 Dreadnought Natural está por **R$ 2.199,00**, sem promoção no momento, e está disponível em estoque (5 unidades).
+Oi! O Takamine GD20 Dreadnought Natural está disponível por R$ 2.199,00, sem promoção no momento. Temos 5 unidades em estoque.
 
-Quer que eu traga mais detalhes sobre ele ou de algum outro violão?
-
----
-
-**👤 Cliente:** E no PIX? Dá pra parcelar no cartão também?
-
-> 🔧 `search_store_policies(query='desconto no PIX e parcelamento no cartão de crédito', k=5)`
-
-**🎸 Duda:**
-
-No PIX, você tem **5% de desconto**. Como o Takamine GD20 não está em promoção, o desconto incide sobre o preço de R$ 2.199,00, ficando em **R$ 2.089,05**.
-
-No cartão de crédito, dá para parcelar **em até 12x sem juros**, com parcela mínima de R$ 100,00. Assim, o violão sai em 12x de R$ 183,25.
-
-Também é possível combinar PIX com cartão em compras acima de R$ 2.000,00, caso queira.
+Quer que eu traga mais detalhes sobre ele ou compare com outros violões?
 
 ---
 
-**👤 Cliente:** E o Taylor 110e, tá com algum desconto?
+**Cliente:** E no PIX? Dá pra parcelar no cartão também?
 
-> 🔧 `search_products(query='Taylor 110e')`
+> **Ferramentas:** `search_store_policies(query='desconto no PIX e parcelamento no cartão de crédito', k=5)`
 
-**🎸 Duda:**
+**Duda:**
 
-Sim! O Taylor 110e Dreadnought Natural está em promoção **Desconto Exclusivo de 8%**:
+No PIX, você paga R$ 2.089,05 à vista (5% de desconto sobre R$ 2.199,00). Esse desconto não é cumulativo com promoções, mas este violão está sem promoção, então vale.
 
-- De R$ 5.999,00 por **R$ 5.519,08**
-- Disponível, com 4 unidades em estoque
+No cartão de crédito, dá para parcelar em até 12x sem juros, com parcela mínima de R$ 100,00. Assim, as 12 parcelas ficam em R$ 183,25.
 
-Como as promoções não são cumulativas, o desconto de 5% no PIX não se aplica sobre esse preço promocional. No cartão, o parcelamento em até 12x sem juros continua valendo.
+Quer que eu veja mais alguma coisa sobre o GD20?
 
 ---
 
-**👤 Cliente:** Se eu pagar o Taylor no PIX ganho os 5% em cima do desconto?
+**Cliente:** E o Taylor 110e, tá com algum desconto?
 
-**🎸 Duda:**
+> **Ferramentas:** `search_products(query='Taylor 110e')`
 
-Não, infelizmente não. A política da loja diz que as promoções não são cumulativas, então o desconto de 5% no PIX não se aplica sobre um preço que já está em promoção.
+**Duda:**
 
-Então o Taylor 110e sai por **R$ 5.519,08** tanto no PIX quanto no cartão. A diferença é que no cartão você pode parcelar em até 12x sem juros.
+Sim! O Taylor 110e Dreadnought Natural está em promoção "Desconto Exclusivo", com 8% de desconto:
 
-Quer que eu veja mais alguma coisa para você?
+- Preço original: R$ 5.999,00
+- Preço final: R$ 5.519,08
+
+Ele está disponível, com 4 unidades em estoque.
+
+Quer que eu compare com o GD20 ou mostre outras opções?
+
+---
+
+**Cliente:** Se eu pagar o Taylor no PIX ganho os 5% em cima do desconto?
+
+**Duda:**
+
+Não, o desconto de PIX não se soma à promoção. As promoções não são cumulativas, então o desconto de 5% no PIX não se aplica sobre um preço que já está em promoção.
+
+No PIX, o Taylor fica em R$ 5.519,08, que é o mesmo preço final da promoção. No cartão, dá para parcelar em até 12x sem juros, com parcela mínima de R$ 100,00.
+
+Quer que eu veja mais alguma coisa sobre os dois violões?
 
 ---
