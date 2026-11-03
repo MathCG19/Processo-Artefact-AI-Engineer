@@ -118,6 +118,9 @@ def run_case(case: dict, resources: AgentResources, use_judge: bool, tickets_pat
         checks.append(Check(f"contém /{pattern}/", _matches(pattern, final)))
     for pattern in case.get("must_not_match", []):
         checks.append(Check(f"não contém /{pattern}/", not _matches(pattern, all_text)))
+    if case.get("single_protocol"):
+        protocols = sorted(set(re.findall(r"EMP-\d{8}-[A-Z0-9]{4}", all_text)))
+        checks.append(Check("um único protocolo na conversa", len(protocols) == 1, ", ".join(protocols)))
 
     conversation = "\n".join(
         f"Cliente: {turn}\nAssistente: {reply.text}" for turn, reply in zip(case["turns"], replies)

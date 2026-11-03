@@ -35,9 +35,16 @@ def escalate_to_human(
 ) -> dict:
     if reason not in HANDOFF_REASONS:
         reason = "outro"
-    protocol = f"EMP-{now:%Y%m%d}-{uuid.uuid4().hex[:4].upper()}"
-    ticket = {
+    # One ticket per case per conversation: a second call about the same order (or, without an
+    # order, the same reason) is appended to the existing ticket instead of opening a duplicate.
+    case_key = f"pedido-{order_id}" if order_id else f"motivo-{reason}"
+    existing = session.tickets.get(case_key)
+    protocol = existing or f"EMP-{now:%Y%m%d}-{uuid.uuid4().hex[:4].upper()}"
+    session.tickets[case_key] = protocol
+
+    record = {
         "protocol": protocol,
+        "type": "update" if existing else "new",
         "created_at": now.isoformat(timespec="seconds"),
         "session_id": session.session_id,
         "customer_id": session.verified_customer_id,  # None if the customer was not verified
@@ -47,7 +54,16 @@ def escalate_to_human(
     }
     tickets_path.parent.mkdir(parents=True, exist_ok=True)
     with tickets_path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(ticket, ensure_ascii=False) + "\n")
+        f.write(json.dumps(record, ensure_ascii=False) + "\n")
+
+    if existing:
+        return {
+            "protocolo": protocol,
+            "ja_existia": True,
+            "prazo_de_retorno": RESPONSE_SLA,
+            "mensagem": "Este caso já tinha um protocolo nesta conversa; a nova informação foi anexada a ele. "
+            "Informe ao cliente o mesmo protocolo (não diga que abriu um novo).",
+        }
     return {
         "protocolo": protocol,
         "prazo_de_retorno": RESPONSE_SLA,

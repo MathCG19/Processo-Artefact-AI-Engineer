@@ -22,6 +22,7 @@ class Session:
     customer_first_name: str | None = None
     failed_verifications: int = 0
     turns: list[list[dict]] = field(default_factory=list)  # one list of messages per user turn
+    tickets: dict[str, str] = field(default_factory=dict)  # case key -> protocol (one ticket per case)
 
     @property
     def verification_locked(self) -> bool:
