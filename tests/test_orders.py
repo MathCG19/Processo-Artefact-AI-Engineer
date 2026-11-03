@@ -55,6 +55,11 @@ def test_list_orders_without_identity_is_refused(data):
     assert list_my_orders(data, Session(), TODAY)["erro"] == "cliente_nao_identificado"
 
 
+def test_order_items_carry_the_category(data):
+    order = get_order_status(data, Session(), TODAY, order_id=8, contact=ANA_EMAIL)
+    assert order["itens"] == [{"produto": "Kala KA-C Concert Mogno", "categoria": "Ukuleles", "quantidade": 1}]
+
+
 def test_dates_are_computed_by_code(data):
     shipped = get_order_status(data, Session(), TODAY, order_id=8, contact=ANA_EMAIL)
     assert shipped["entrega_atrasada"] is True

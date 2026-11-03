@@ -31,17 +31,17 @@ class Transcript:
             lines += [description, ""]
         lines += [
             f"> **Modelo:** `{self.model}` · **Data de referência:** {self.date} · **Canal:** {self.channel}  ",
-            f"> **Custo total:** US$ {total_cost:.4f} · As linhas 🔧 mostram as ferramentas que o agente chamou (não aparecem para o cliente).",
+            f"> **Custo total:** US$ {total_cost:.4f} · As linhas **Ferramentas** mostram o que o agente consultou (não aparecem para o cliente).",
             "",
             "---",
             "",
         ]
         for user_text, reply in self.entries:
-            lines += [f"**👤 Cliente:** {user_text}", ""]
+            lines += [f"**Cliente:** {user_text}", ""]
             if reply.tool_calls:
                 calls = " → ".join(f"`{format_tool_call(t.name, t.arguments)}`" for t in reply.tool_calls)
-                lines += [f"> 🔧 {calls}", ""]
-            lines += ["**🎸 Duda:**", "", reply.text, "", "---", ""]
+                lines += [f"> **Ferramentas:** {calls}", ""]
+            lines += ["**Duda:**", "", reply.text, "", "---", ""]
         return "\n".join(lines)
 
     def save(self, path: Path, description: str | None = None) -> Path:

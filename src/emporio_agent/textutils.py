@@ -14,6 +14,11 @@ STOPWORDS = {
 }
 
 
+# Emoji code points: pictographs/emoticons, misc symbols and dingbats, the "misc symbols and
+# arrows" block, regional-indicator flags and the emoji variation selector.
+EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\U0001F1E6-\U0001F1FF\uFE0F]")
+
+
 def strip_accents(text: str) -> str:
     return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c))
 

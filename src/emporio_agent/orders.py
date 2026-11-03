@@ -64,14 +64,18 @@ def identify_by_channel_phone(data: StoreData, session: Session) -> None:
 
 def _order_view(data: StoreData, order: pd.Series, today: date) -> dict:
     items = data.order_items[data.order_items.order_id == order.order_id].merge(
-        data.products[["product_id", "name"]], on="product_id", how="left"
+        data.products[["product_id", "name", "category_name"]], on="product_id", how="left"
     )
     view = {
         "order_id": int(order.order_id),
         "status": STATUS_LABELS.get(order.status, order.status),
         "data_do_pedido": order.order_date.isoformat(),
         "dias_desde_o_pedido": (today - order.order_date).days,
-        "itens": [{"produto": r["name"], "quantidade": int(r.quantity)} for _, r in items.iterrows()],
+        # Category included so the model never has to guess the instrument type from the name.
+        "itens": [
+            {"produto": r["name"], "categoria": r.category_name, "quantidade": int(r.quantity)}
+            for _, r in items.iterrows()
+        ],
         "valor_total": float(order.total_brl),
         "forma_de_pagamento": payment_label(order.payment_method),
         "codigo_de_rastreamento": order.tracking_code,

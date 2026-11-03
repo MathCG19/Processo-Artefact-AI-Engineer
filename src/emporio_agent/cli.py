@@ -84,7 +84,7 @@ def main(argv: list[str] | None = None) -> int:
 
         if debug:
             for call in reply.tool_calls:
-                console.print(f"[dim]🔧 {format_tool_call(call.name, call.arguments)} ({call.duration_ms} ms)[/]")
+                console.print(f"[dim]\\[ferramenta] {format_tool_call(call.name, call.arguments)} ({call.duration_ms} ms)[/]")
                 console.print(f"[dim]   ↳ {json.dumps(call.result, ensure_ascii=False, default=str)[:300]}[/]")
             console.print(
                 f"[dim]{reply.llm_calls} chamadas ao LLM · {reply.prompt_tokens}+{reply.completion_tokens} tokens · "
@@ -97,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         path = PROJECT_ROOT / "conversations" / "sessions" / f"{datetime.now():%Y%m%d-%H%M%S}.md"
         transcript.save(path)
         console.print(f"[dim]Conversa salva em {path}[/]")
-    console.print("Até mais! 🎶")
+    console.print("Até mais!")
     return 0
 
 

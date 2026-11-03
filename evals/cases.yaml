@@ -70,6 +70,8 @@
 - id: categoria_sem_produtos
   category: catalogo
   turns: ["Vocês têm saxofone?"]
+  # Regressão: o Haiku às vezes encurtava "No momento não temos" para "No temos".
+  must_not_match: ['(^|[.!?]\s+)No temos']
   judge: >-
     O assistente diz que no momento não há saxofones (ou instrumentos de sopro) no catálogo,
     sem inventar modelos, marcas ou preços de saxofone.

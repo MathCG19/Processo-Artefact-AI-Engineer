@@ -28,7 +28,7 @@ from rich.table import Table
 from emporio_agent.agent import Agent, AgentResources
 from emporio_agent.config import PROJECT_ROOT, RUNTIME_DIR, Settings
 from emporio_agent.session import Session
-from emporio_agent.textutils import strip_accents
+from emporio_agent.textutils import EMOJI, strip_accents
 
 EVALS_DIR = PROJECT_ROOT / "evals"
 
@@ -118,6 +118,9 @@ def run_case(case: dict, resources: AgentResources, use_judge: bool, tickets_pat
         checks.append(Check(f"contém /{pattern}/", _matches(pattern, final)))
     for pattern in case.get("must_not_match", []):
         checks.append(Check(f"não contém /{pattern}/", not _matches(pattern, all_text)))
+    if replies:  # global style rule, checked on every case
+        found = EMOJI.findall(all_text)
+        checks.append(Check("respostas sem emojis", not found, "".join(found)))
     if case.get("single_protocol"):
         protocols = sorted(set(re.findall(r"EMP-\d{8}-[A-Z0-9]{4}", all_text)))
         checks.append(Check("um único protocolo na conversa", len(protocols) == 1, ", ".join(protocols)))
@@ -168,7 +171,7 @@ def write_report(results: list[dict], settings: Settings, use_judge: bool) -> Pa
     for r in results:
         failures = "; ".join(f"{c['name']} ({c['detail']})" if c["detail"] else c["name"] for c in r["checks"] if not c["ok"])
         tools = ", ".join(dict.fromkeys(r["tools_called"])) or "—"
-        lines.append(f"| `{r['id']}` | {r['category']} | {'✅' if r['passed'] else '❌'} | {tools} | {failures or '—'} |")
+        lines.append(f"| `{r['id']}` | {r['category']} | {'passou' if r['passed'] else 'FALHOU'} | {tools} | {failures or '—'} |")
     report = results_dir / f"summary_{slug}.md"
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return report
