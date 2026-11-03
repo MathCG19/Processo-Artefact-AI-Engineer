@@ -32,7 +32,11 @@ def main(argv: list[str] | None = None) -> int:
     if sys.platform == "win32":
         sys.stdout.reconfigure(encoding="utf-8")  # emojis/accents on Windows terminals
     console = Console()
-    settings = Settings.from_env(llm_model=args.model)
+    try:
+        settings = Settings.from_env(llm_model=args.model)
+    except RuntimeError as exc:  # missing API key: explain instead of showing a traceback
+        console.print(f"[red]{exc}[/]")
+        return 1
 
     with console.status("Carregando catálogo e manual de políticas..."):
         resources = AgentResources.load(settings)
