@@ -1,0 +1,26 @@
+# Segredos — o repositório é público
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+build/
+dist/
+
+# Artefatos gerados em tempo de execução
+.cache/
+runtime/
+conversations/sessions/
+evals/results/*.json
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

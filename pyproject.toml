@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "emporio-agent"
+version = "0.1.0"
+description = "Agente de atendimento da Empório da Música (desafio técnico AI Engineer - Artefact)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.40",          # cliente OpenAI-compatible, apontado para o OpenRouter
+    "pandas>=2.2",           # camada de dados estruturados (CSVs)
+    "numpy>=1.26",           # busca vetorial em memória
+    "pymupdf4llm>=0.0.17",   # PDF -> Markdown preservando seções e tabelas
+    "python-dotenv>=1.0",
+    "rich>=13.7",            # CLI
+    "pyyaml>=6.0",           # casos de avaliação
+    "tzdata; sys_platform == 'win32'",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+
+[project.scripts]
+emporio-agent = "emporio_agent.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["network: testes que chamam a API do OpenRouter (pulados sem OPENROUTER_API_KEY)"]
